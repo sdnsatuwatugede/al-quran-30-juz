@@ -47,46 +47,17 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  if (app.get("env") === "development") {
+  if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // Try to use port 3000, fallback to other ports if unavailable
-  const tryPort = async (port: number): Promise<number> => {
-    try {
-      await new Promise<void>((resolve, reject) => {
-        server.once('error', (err: any) => {
-          if (err.code === 'EADDRINUSE') {
-            server.close();
-            resolve();
-          } else {
-            reject(err);
-          }
-        });
-        
-        server.listen(port, "0.0.0.0", () => {
-          log(`Server started on port ${port}`);
-          resolve();
-        });
-      });
-      
-      return port;
-    } catch (error) {
-      if (error.code === 'EADDRINUSE') {
-        log(`Port ${port} is busy, trying ${port + 1}`);
-        return tryPort(port + 1);
-      }
-      throw error;
-    }
-  };
-
-  try {
-    const port = await tryPort(process.env.PORT ? parseInt(process.env.PORT) : 3000);
-    log(`Server is running on http://localhost:${port}`);
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
-})();
+  const port = process.env.PORT || 3000;
+  server.listen(port, () => {
+    log(`Server is running on port ${port}`);
+  });
+})().catch((error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+});
