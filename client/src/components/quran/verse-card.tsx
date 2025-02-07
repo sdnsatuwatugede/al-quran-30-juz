@@ -38,7 +38,7 @@ export default function VerseCard({ verse, onPlaybackComplete, autoPlay }: Verse
       // Wait 30 seconds before playing the next verse
       timeoutRef.current = setTimeout(() => {
         onPlaybackComplete();
-      }, 30000);
+      }, 2000);
     }
   };
 
