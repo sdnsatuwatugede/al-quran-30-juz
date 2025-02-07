@@ -3,14 +3,21 @@ import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 
-// Existing API types
+// API types
 export const verseSchema = z.object({
-  id: z.number(),
-  surah: z.number(),
-  nomor: z.number(),
-  ar: z.string(),
-  tr: z.string(),
-  idn: z.string()
+  id: z.string(),
+  arab: z.string(),
+  audio: z.string(),
+  ayah: z.string(),
+  surah: z.string(),
+  juz: z.string(),
+  latin: z.string(),
+  text: z.string(),
+  asbab: z.string().nullable(),
+  hizb: z.string().nullable(),
+  notes: z.string().nullable(),
+  page: z.string(),
+  theme: z.string().nullable()
 });
 
 export const juzSchema = z.object({
@@ -33,7 +40,7 @@ export const bookmarks = pgTable('bookmarks', {
   id: serial('id').primaryKey(),
   userId: integer('user_id').references(() => users.id).notNull(),
   juz: integer('juz').notNull(),
-  verseId: integer('verse_id').notNull(),
+  verseId: text('verse_id').notNull(),
   note: text('note'),
   createdAt: timestamp('created_at').defaultNow(),
 });
@@ -42,7 +49,7 @@ export const readingProgress = pgTable('reading_progress', {
   id: serial('id').primaryKey(),
   userId: integer('user_id').references(() => users.id).notNull(),
   juz: integer('juz').notNull(),
-  lastVerseId: integer('last_verse_id').notNull(),
+  lastVerseId: text('last_verse_id').notNull(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 

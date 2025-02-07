@@ -9,12 +9,15 @@ export default function Juz() {
   const { id } = useParams();
   const juzId = parseInt(id || "1");
 
-  const { data: juz, isLoading } = useQuery({
-    queryKey: [`https://api.myquran.com/v2/quran/ayat/juz/${juzId}`],
+  const { data: juz, isLoading, error } = useQuery({
+    queryKey: [`/v2/quran/ayat/juz/${juzId}`],
     queryFn: async ({ queryKey }) => {
-      const res = await fetch(queryKey[0]);
+      const res = await fetch(`https://api.myquran.com${queryKey[0]}`);
       const data = await res.json();
-      return juzSchema.parse(data.data);
+      return juzSchema.parse({
+        juz: juzId,
+        verses: data.data
+      });
     }
   });
 
@@ -24,6 +27,15 @@ export default function Juz() {
         {Array.from({ length: 5 }).map((_, i) => (
           <Skeleton key={i} className="h-32 w-full" />
         ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-destructive">
+        <p>Error loading Juz {juzId}</p>
+        <p className="text-sm">{(error as Error).message}</p>
       </div>
     );
   }
