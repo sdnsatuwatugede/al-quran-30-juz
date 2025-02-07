@@ -2,24 +2,57 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Pause } from "lucide-react";
 import type { Verse } from "@shared/schema";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface VerseCardProps {
   verse: Verse;
+  onPlaybackComplete?: () => void;
+  autoPlay?: boolean;
 }
 
-export default function VerseCard({ verse }: VerseCardProps) {
+export default function VerseCard({ verse, onPlaybackComplete, autoPlay }: VerseCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (autoPlay) {
+      handleAudioToggle();
+    }
+
+    return () => {
+      // Cleanup on unmount
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.removeEventListener('ended', handleAudioEnd);
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [autoPlay]);
+
+  const handleAudioEnd = () => {
+    setIsPlaying(false);
+    if (onPlaybackComplete) {
+      // Wait 30 seconds before playing the next verse
+      timeoutRef.current = setTimeout(() => {
+        onPlaybackComplete();
+      }, 30000);
+    }
+  };
 
   const handleAudioToggle = () => {
     if (!audioRef.current) {
       audioRef.current = new Audio(verse.audio);
-      audioRef.current.addEventListener('ended', () => setIsPlaying(false));
+      audioRef.current.addEventListener('ended', handleAudioEnd);
     }
 
     if (isPlaying) {
       audioRef.current.pause();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     } else {
       audioRef.current.play();
     }

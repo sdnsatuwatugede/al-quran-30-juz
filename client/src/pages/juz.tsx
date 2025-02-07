@@ -4,10 +4,12 @@ import { juzSchema } from "@shared/schema";
 import JuzSelector from "@/components/quran/juz-selector";
 import VerseCard from "@/components/quran/verse-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
 
 export default function Juz() {
   const { id } = useParams();
   const juzId = parseInt(id || "1");
+  const [currentVerseIndex, setCurrentVerseIndex] = useState(0);
 
   const { data: juz, isLoading, error } = useQuery({
     queryKey: [`/v2/quran/ayat/juz/${juzId}`],
@@ -20,6 +22,12 @@ export default function Juz() {
       });
     }
   });
+
+  const handleVerseComplete = () => {
+    if (juz && currentVerseIndex < juz.verses.length - 1) {
+      setCurrentVerseIndex(currentVerseIndex + 1);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -48,8 +56,13 @@ export default function Juz() {
       </div>
 
       <div className="space-y-4">
-        {juz?.verses.map((verse) => (
-          <VerseCard key={verse.id} verse={verse} />
+        {juz?.verses.map((verse, index) => (
+          <VerseCard 
+            key={verse.id} 
+            verse={verse}
+            autoPlay={index === currentVerseIndex}
+            onPlaybackComplete={handleVerseComplete}
+          />
         ))}
       </div>
     </div>
