@@ -53,7 +53,7 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Try to use port 5000, fallback to other ports if unavailable
+  // Try to use port 3000, fallback to other ports if unavailable
   const tryPort = async (port: number): Promise<number> => {
     try {
       await new Promise<void>((resolve, reject) => {
@@ -83,7 +83,7 @@ app.use((req, res, next) => {
   };
 
   try {
-    const port = await tryPort(5000);
+    const port = await tryPort(process.env.PORT ? parseInt(process.env.PORT) : 3000);
     log(`Server is running on http://localhost:${port}`);
   } catch (error) {
     console.error('Failed to start server:', error);
